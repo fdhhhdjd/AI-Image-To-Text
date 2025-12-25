@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moondream AI Vision - Phân Tích Ảnh Thông Minh</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", "Roboto", sans-serif;
+      }
+
+      :root {
+        --primary: #7c3aed;
+        --primary-dark: #6d28d9;
+        --secondary: #10b981;
+        --dark: #0f172a;
+        --dark-light: #1e293b;
+        --light: #f8fafc;
+        --gray: #94a3b8;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --error: #ef4444;
+        --border-radius: 12px;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        --transition: all 0.3s ease;
+      }
+
+      body {
+        background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+        color: var(--light);
+        min-height: 100vh;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(124, 58, 237, 0.1);
+        padding: 16px 28px;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+      }
+
+      .logo-image {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 6px;
+      }
+
+      .logo-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .logo-text h1 {
+        font-size: 2.3rem;
+        line-height: 1.2;
+      }
+
+      .brand-sub {
+        font-size: 0.9rem;
+        color: var(--gray);
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .logo-icon {
+        font-size: 2rem;
+        color: var(--primary);
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 700;
+      }
+
+      /* .subtitle {
+        color: var(--gray);
+        font-size: 1.1rem;
+        max-width: 800px;
+        margin: 0 auto;
+      } */
+
+      /* Main Layout */
+      .app-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      @media (max-width: 1100px) {
+        .app-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Panel Base */
+      .panel {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: var(--border-radius);
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--shadow);
+        height: 100%;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid rgba(124, 58, 237, 0.3);
+      }
+
+      .panel-icon {
+        font-size: 1.5rem;
+        color: var(--primary);
+        background: rgba(124, 58, 237, 0.1);
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .panel-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--light);
+      }
+
+      /* Upload Section */
+      .upload-section {
+        margin-bottom: 25px;
+      }
+
+      .upload-area {
+        border: 3px dashed rgba(124, 58, 237, 0.3);
+        border-radius: var(--border-radius);
+        padding: 50px 25px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        background: rgba(15, 23, 42, 0.5);
+      }
+
+      .upload-area:hover,
+      .upload-area.dragover {
+        border-color: var(--primary);
+        background: rgba(124, 58, 237, 0.05);
+      }
+
+      .upload-icon {
+        font-size: 3.5rem;
+        color: var(--primary);
+        margin-bottom: 15px;
+        opacity: 0.8;
+      }
+
+      .upload-text {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .upload-subtext {
+        color: var(--gray);
+        margin-bottom: 25px;
+        font-size: 0.9rem;
+      }
+
+      .upload-btn {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+      }
+
+      .image-preview {
+        max-width: 100%;
+        max-height: 350px;
+        border-radius: var(--border-radius);
+        display: none;
+        margin-top: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .has-image .upload-area {
+        padding: 25px;
+      }
+
+      .has-image .upload-icon,
+      .has-image .upload-text,
+      .has-image .upload-subtext,
+      .has-image .upload-btn {
+        display: none;
+      }
+
+      .has-image .image-preview {
+        display: block;
+      }
+
+      /* URL Input Section */
+      .url-input-section {
+        margin-bottom: 25px;
+      }
+
+      .url-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      .url-input {
+        width: 100%;
+        padding: 14px;
+        border-radius: var(--border-radius);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.7);
+        color: var(--light);
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      .url-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      /* Image Controls */
+      .image-controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: center;
+      }
+
+      .image-control-btn {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .image-control-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: translateY(-2px);
+      }
+
+      /* Prompt Input */
+      .prompt-section {
+        margin: 25px 0;
+      }
+
+      .prompt-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      .prompt-input {
+        width: 100%;
+        padding: 18px;
+        border-radius: var(--border-radius);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.7);
+        color: var(--light);
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 120px;
+        transition: var(--transition);
+      }
+
+      .prompt-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .example-prompts {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .example-btn {
+        background: rgba(124, 58, 237, 0.1);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        color: var(--primary);
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: left;
+      }
+
+      .example-btn:hover {
+        background: rgba(124, 58, 237, 0.2);
+        transform: translateY(-2px);
+      }
+
+      /* API Settings */
+      .api-settings {
+        background: rgba(15, 23, 42, 0.6);
+        padding: 20px;
+        border-radius: var(--border-radius);
+        margin: 25px 0;
+      }
+
+      .api-modes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .api-modes {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .api-mode {
+        background: rgba(30, 41, 59, 0.7);
+        border: 2px solid transparent;
+        border-radius: 10px;
+        padding: 15px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+      }
+
+      .api-mode:hover {
+        background: rgba(30, 41, 59, 0.9);
+      }
+
+      .api-mode.active {
+        border-color: var(--primary);
+        background: rgba(124, 58, 237, 0.15);
+      }
+
+      .mode-icon {
+        font-size: 1.5rem;
+        color: var(--primary);
+        margin-bottom: 8px;
+      }
+
+      .mode-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+      }
+
+      .mode-desc {
+        color: var(--gray);
+        font-size: 0.8rem;
+      }
+
+      .endpoint-input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.8);
+        color: var(--light);
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+      }
+
+      .endpoint-input:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      /* Action Buttons */
+      .action-buttons {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .action-buttons {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .btn {
+        padding: 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
+        color: white;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--light);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .btn-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+
+      .btn-danger:hover:not(:disabled) {
+        background: rgba(239, 68, 68, 0.2);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Results Panel */
+      .results-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .results-content {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 600px;
+        padding-right: 10px;
+      }
+
+      .results-content::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .results-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+      }
+
+      .results-content::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 10px;
+      }
+
+      .result-card {
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 4px solid var(--primary);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .result-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .result-model {
+        background: rgba(124, 58, 237, 0.1);
+        color: var(--primary);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .result-time {
+        color: var(--gray);
+        font-size: 0.85rem;
+      }
+
+      .result-stats {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--secondary);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .result-prompt {
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--light);
+      }
+
+      .result-answer {
+        background: rgba(15, 23, 42, 0.8);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        line-height: 1.6;
+        color: #e5e7eb;
+        position: relative;
+      }
+
+      .thinking-indicator {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .thinking-indicator.active {
+        display: flex;
+      }
+
+      .thinking-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .thinking-dot {
+        width: 6px;
+        height: 6px;
+        background-color: var(--primary);
+        border-radius: 50%;
+        animation: thinkingDot 1.5s infinite ease-in-out;
+      }
+
+      .thinking-dot:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .thinking-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .thinking-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes thinkingDot {
+        0%,
+        100% {
+          opacity: 0.3;
+          transform: scale(0.8);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2);
+        }
+      }
+
+      .result-image-container {
+        text-align: center;
+        margin-top: 15px;
+      }
+
+      .result-image {
+        max-width: 250px;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .empty-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray);
+      }
+
+      .empty-icon {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+      }
+
+      .empty-title {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+        color: var(--light);
+        opacity: 0.7;
+      }
+
+      /* Stats Panel */
+      .stats-panel {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+        padding: 20px;
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 15px;
+        background: rgba(30, 41, 59, 0.8);
+        border-radius: 10px;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        color: var(--gray);
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      /* Toast */
+      .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+
+      .toast {
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-left: 4px solid var(--primary);
+        box-shadow: var(--shadow);
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        max-width: 350px;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast-icon {
+        font-size: 1.5rem;
+      }
+
+      .toast-success {
+        border-left-color: var(--success);
+      }
+
+      .toast-success .toast-icon {
+        color: var(--success);
+      }
+
+      .toast-error {
+        border-left-color: var(--error);
+      }
+
+      .toast-error .toast-icon {
+        color: var(--error);
+      }
+
+      .toast-warning {
+        border-left-color: var(--warning);
+      }
+
+      .toast-warning .toast-icon {
+        color: var(--warning);
+      }
+
+      .toast-message {
+        flex: 1;
+        font-weight: 500;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 30px 0 20px;
+        margin-top: 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        color: var(--gray);
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      .footer-link {
+        color: var(--primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+        font-weight: 500;
+      }
+
+      .footer-link:hover {
+        color: var(--secondary);
+      }
+
+      /* Loading */
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 40px;
+      }
+
+      .loading.active {
+        display: block;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(124, 58, 237, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--primary);
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        font-size: 1.1rem;
+        color: var(--gray);
+        font-weight: 600;
+      }
+
+      .brand-link {
+        background: rgba(124, 58, 237, 0.08);
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(124, 58, 237, 0.2);
+      }
+
+      .brand-link:hover {
+        background: rgba(124, 58, 237, 0.2);
+        color: var(--secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <img
+            src="./logo.jpg"
+            alt="Code Web Không Khó Logo"
+            class="logo-image"
+          />
+          <div class="logo-text">
+            <h1>Moondream AI Vision</h1>
+            <span class="brand-sub">Code Web Không Khó</span>
+          </div>
+        </div>
+        <!-- <p class="subtitle">
+          Phân tích hình ảnh thông minh với AI Moondream. Hỗ trợ đầy đủ 3
+          endpoint API từ service của bạn.
+        </p> -->
+      </header>
+
+      <!-- Main Content -->
+      <main class="app-grid">
+        <!-- Left Panel: Input -->
+        <section class="panel">
+          <div class="panel-header">
+            <div class="panel-icon">
+              <i class="fas fa-upload"></i>
+            </div>
+            <h2 class="panel-title">Phân Tích Ảnh</h2>
+          </div>
+
+          <!-- URL Input (for OpenAI mode) -->
+          <div
+            class="url-input-section"
+            id="urlInputSection"
+            style="display: none"
+          >
+            <div class="url-label">
+              <i class="fas fa-link"></i>
+              <span>URL Ảnh (cho OpenAI)</span>
+            </div>
+            <input
+              type="text"
+              class="url-input"
+              id="imageUrlInput"
+              placeholder="Nhập URL ảnh (https://example.com/image.jpg)"
+            />
+          </div>
+
+          <!-- Image Upload (for Ollama modes) -->
+          <div class="upload-section" id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+              <i class="fas fa-cloud-upload-alt upload-icon"></i>
+              <div class="upload-text">Kéo thả ảnh vào đây</div>
+              <div class="upload-subtext">
+                hoặc click để chọn file (JPG, PNG, WEBP)
+              </div>
+              <button class="upload-btn" id="uploadBtn">
+                <i class="fas fa-folder-open"></i> Chọn Ảnh
+              </button>
+              <input type="file" id="imageInput" accept="image/*" hidden />
+              <img class="image-preview" id="imagePreview" alt="Preview" />
+            </div>
+            <div
+              class="image-controls"
+              id="imageControls"
+              style="display: none"
+            >
+              <button class="image-control-btn" id="clearImageBtn">
+                <i class="fas fa-times"></i> Xóa Ảnh
+              </button>
+            </div>
+          </div>
+
+          <!-- Prompt Input -->
+          <div class="prompt-section">
+            <div class="prompt-label">
+              <i class="fas fa-question-circle"></i>
+              <span>Câu hỏi về ảnh</span>
+            </div>
+            <textarea
+              class="prompt-input"
+              id="promptInput"
+              placeholder="Nhập câu hỏi về hình ảnh... Ví dụ: Mô tả chi tiết bức ảnh này"
+            ></textarea>
+
+            <div class="example-prompts">
+              <button
+                class="example-btn"
+                data-prompt="Describe this image in detail"
+              >
+                📝 Mô tả chi tiết
+              </button>
+
+              <button
+                class="example-btn"
+                data-prompt="What objects are in this image?"
+              >
+                🔍 Vật thể trong ảnh
+              </button>
+
+              <button
+                class="example-btn"
+                data-prompt="What are the dominant colors in the image?"
+              >
+                🎨 Màu sắc
+              </button>
+
+              <button
+                class="example-btn"
+                data-prompt="What is the background or context of this image?"
+              >
+                🏞️ Bối cảnh
+              </button>
+
+              <button
+                class="example-btn"
+                data-prompt="How many people are in this image?"
+              >
+                👥 Đếm người
+              </button>
+
+              <button
+                class="example-btn"
+                data-prompt="Where was this image taken?"
+              >
+                📍 Địa điểm
+              </button>
+            </div>
+          </div>
+
+          <!-- API Settings -->
+          <div class="api-settings">
+            <div class="api-modes">
+              <div class="api-mode active" data-mode="openai">
+                <i class="fas fa-code mode-icon"></i>
+                <div class="mode-name">Phân tích từ URL</div>
+                <div class="mode-desc">/v1/chat/completions</div>
+              </div>
+              <div class="api-mode" data-mode="ollama-chat">
+                <i class="fas fa-comment mode-icon"></i>
+                <div class="mode-name">Phân tích ảnh</div>
+                <div class="mode-desc">/api/chat</div>
+              </div>
+              <div class="api-mode" data-mode="ollama-generate">
+                <i class="fas fa-bolt mode-icon"></i>
+                <div class="mode-name">Phản hồi nhanh</div>
+                <div class="mode-desc">/api/generate</div>
+              </div>
+            </div>
+
+            <input
+              type="text"
+              class="endpoint-input"
+              id="apiEndpoint"
+              value="http://103.82.24.142:18000"
+              placeholder="Nhập URL API"
+            />
+
+            <div class="action-buttons">
+              <button class="btn btn-primary" id="analyzeBtn">
+                <i class="fas fa-search"></i> Phân Tích Ảnh
+              </button>
+              <button class="btn btn-secondary" id="testBtn">
+                <i class="fas fa-vial"></i> Test API
+              </button>
+              <button class="btn btn-danger" id="clearBtn">
+                <i class="fas fa-trash"></i> Xóa
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Indicator -->
+          <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadingText">Đang phân tích...</div>
+          </div>
+        </section>
+
+        <!-- Right Panel: Results -->
+        <section class="panel">
+          <div class="results-container">
+            <div class="panel-header">
+              <div class="panel-icon">
+                <i class="fas fa-history"></i>
+              </div>
+              <h2 class="panel-title">Kết Quả Phân Tích</h2>
+            </div>
+
+            <!-- Results Content -->
+            <div class="results-content" id="resultsContent">
+              <div class="empty-results">
+                <i class="fas fa-comments empty-icon"></i>
+                <div class="empty-title">Chưa có kết quả</div>
+                <p>Tải ảnh lên và đặt câu hỏi để bắt đầu</p>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-panel" id="statsPanel" style="display: none">
+              <div class="stat-item">
+                <div class="stat-value" id="totalRequests">0</div>
+                <div class="stat-label">Requests</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="avgTime">0.00</div>
+                <div class="stat-label">Thời gian TB (s)</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value" id="successRate">100%</div>
+                <div class="stat-label">Thành công</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Toast Container -->
+      <div class="toast-container" id="toastContainer"></div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>
+          Moondream API Service - Tích hợp đầy đủ 3 endpoint API từ
+          documentation
+        </p>
+        <div class="footer-links">
+          <a
+            href="https://www.tiktok.com/@codewebkhongkho"
+            class="footer-link brand-link"
+            target="_blank"
+          >
+            <i class="fab fa-tiktok"></i> TikTok: Code Web Không Khó
+          </a>
+
+          <a
+            href="https://www.facebook.com/codewebkhongkho"
+            class="footer-link brand-link"
+            target="_blank"
+          >
+            <i class="fab fa-facebook"></i> Facebook Page: Code Web Không Khó
+          </a>
+          <a
+            href="http://103.82.24.142:18000/docs"
+            class="footer-link"
+            target="_blank"
+          >
+            <i class="fas fa-book"></i> API Documentation
+          </a>
+          <a
+            href="http://103.82.24.142:18000/health"
+            class="footer-link"
+            target="_blank"
+          >
+            <i class="fas fa-heartbeat"></i> Health Check
+          </a>
+          <a href="#" class="footer-link" id="clearHistoryBtn">
+            <i class="fas fa-trash-alt"></i> Xóa Lịch Sử
+          </a>
+          <a href="#" class="footer-link" id="exportBtn">
+            <i class="fas fa-download"></i> Export JSON
+          </a>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // State Management
+      const AppState = {
+        currentImage: null,
+        currentImageBase64: null,
+        currentImageUrl: "",
+        selectedMode: "openai",
+        apiEndpoint: "http://103.82.24.142:18000",
+        history: [],
+        stats: {
+          totalRequests: 0,
+          successfulRequests: 0,
+          totalResponseTime: 0,
+        },
+        isAnalyzing: false,
+      };
+
+      // DOM Elements
+      const Elements = {
+        uploadSection: document.getElementById("uploadSection"),
+        uploadArea: document.getElementById("uploadArea"),
+        imageInput: document.getElementById("imageInput"),
+        uploadBtn: document.getElementById("uploadBtn"),
+        imagePreview: document.getElementById("imagePreview"),
+        clearImageBtn: document.getElementById("clearImageBtn"),
+        imageControls: document.getElementById("imageControls"),
+        urlInputSection: document.getElementById("urlInputSection"),
+        imageUrlInput: document.getElementById("imageUrlInput"),
+        promptInput: document.getElementById("promptInput"),
+        analyzeBtn: document.getElementById("analyzeBtn"),
+        testBtn: document.getElementById("testBtn"),
+        clearBtn: document.getElementById("clearBtn"),
+        clearHistoryBtn: document.getElementById("clearHistoryBtn"),
+        exportBtn: document.getElementById("exportBtn"),
+        apiEndpointInput: document.getElementById("apiEndpoint"),
+        resultsContent: document.getElementById("resultsContent"),
+        statsPanel: document.getElementById("statsPanel"),
+        loading: document.getElementById("loading"),
+        loadingText: document.getElementById("loadingText"),
+        toastContainer: document.getElementById("toastContainer"),
+        apiModes: document.querySelectorAll(".api-mode"),
+        exampleBtns: document.querySelectorAll(".example-btn"),
+      };
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", initApp);
+
+      function initApp() {
+        loadSavedData();
+        setupEventListeners();
+        updateUIForMode(); // Initialize UI based on default mode
+        checkApiHealth();
+      }
+
+      function setupEventListeners() {
+        // Image upload
+        Elements.uploadBtn.addEventListener("click", () =>
+          Elements.imageInput.click()
+        );
+        Elements.uploadArea.addEventListener("click", (e) => {
+          if (
+            !e.target.closest(".upload-btn") &&
+            !e.target.closest(".image-control-btn")
+          ) {
+            Elements.imageInput.click();
+          }
+        });
+
+        Elements.imageInput.addEventListener("change", handleImageSelect);
+        Elements.clearImageBtn.addEventListener("click", clearUploadedImage);
+
+        // Image URL input
+        Elements.imageUrlInput.addEventListener("input", () => {
+          AppState.currentImageUrl = Elements.imageUrlInput.value.trim();
+          saveToLocalStorage();
+        });
+
+        // Drag and drop
+        ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+          Elements.uploadArea.addEventListener(
+            eventName,
+            preventDefaults,
+            false
+          );
+        });
+
+        ["dragenter", "dragover"].forEach((eventName) => {
+          Elements.uploadArea.addEventListener(
+            eventName,
+            () => {
+              Elements.uploadArea.classList.add("dragover");
+            },
+            false
+          );
+        });
+
+        ["dragleave", "drop"].forEach((eventName) => {
+          Elements.uploadArea.addEventListener(
+            eventName,
+            () => {
+              Elements.uploadArea.classList.remove("dragover");
+            },
+            false
+          );
+        });
+
+        Elements.uploadArea.addEventListener("drop", handleDrop, false);
+
+        // API mode selection
+        Elements.apiModes.forEach((mode) => {
+          mode.addEventListener("click", () => {
+            Elements.apiModes.forEach((m) => m.classList.remove("active"));
+            mode.classList.add("active");
+            AppState.selectedMode = mode.dataset.mode;
+            updateUIForMode();
+            saveToLocalStorage();
+          });
+        });
+
+        // Example prompts
+        Elements.exampleBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            Elements.promptInput.value = btn.dataset.prompt;
+            Elements.promptInput.focus();
+          });
+        });
+
+        // Action buttons
+        Elements.analyzeBtn.addEventListener("click", analyzeImage);
+        Elements.testBtn.addEventListener("click", testApiEndpoint);
+        Elements.clearBtn.addEventListener("click", clearCurrentInput);
+        Elements.clearHistoryBtn.addEventListener("click", clearHistory);
+        Elements.exportBtn.addEventListener("click", exportHistory);
+
+        // API endpoint
+        Elements.apiEndpointInput.addEventListener("change", () => {
+          AppState.apiEndpoint = Elements.apiEndpointInput.value.trim();
+          saveToLocalStorage();
+          showToast("Đã cập nhật API endpoint", "success");
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener("keydown", (e) => {
+          if (e.ctrlKey && e.key === "Enter") {
+            e.preventDefault();
+            analyzeImage();
+          }
+          if (e.key === "Escape") {
+            clearCurrentInput();
+          }
+        });
+      }
+
+      // Update UI based on selected mode
+      function updateUIForMode() {
+        // Reset all
+        Elements.uploadSection.style.display = "none";
+        Elements.urlInputSection.style.display = "none";
+        Elements.imageControls.style.display = "none";
+
+        switch (AppState.selectedMode) {
+          case "openai":
+            Elements.urlInputSection.style.display = "block";
+            // Load saved URL if exists
+            if (AppState.currentImageUrl) {
+              Elements.imageUrlInput.value = AppState.currentImageUrl;
+            }
+            break;
+          case "ollama-chat":
+          case "ollama-generate":
+            Elements.uploadSection.style.display = "block";
+            // Show image controls if image exists
+            if (AppState.currentImageBase64) {
+              Elements.imageControls.style.display = "flex";
+            }
+            break;
+        }
+      }
+
+      // Image handling
+      function handleImageSelect(e) {
+        const file = e.target.files[0];
+        if (file) processImageFile(file);
+      }
+
+      function handleDrop(e) {
+        const file = e.dataTransfer.files[0];
+        if (file) processImageFile(file);
+      }
+
+      function processImageFile(file) {
+        if (!file.type.match("image.*")) {
+          showToast("Chỉ chấp nhận file hình ảnh!", "error");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          AppState.currentImageBase64 = e.target.result;
+          AppState.currentImage = file;
+
+          Elements.imagePreview.src = AppState.currentImageBase64;
+          Elements.uploadArea.classList.add("has-image");
+          Elements.imageControls.style.display = "flex";
+
+          showToast("Đã tải ảnh lên thành công", "success");
+          saveToLocalStorage();
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function clearUploadedImage() {
+        AppState.currentImage = null;
+        AppState.currentImageBase64 = null;
+        Elements.imagePreview.src = "";
+        Elements.uploadArea.classList.remove("has-image");
+        Elements.imageControls.style.display = "none";
+        Elements.imageInput.value = "";
+        showToast("Đã xóa ảnh", "success");
+        saveToLocalStorage();
+      }
+
+      function clearCurrentInput() {
+        if (AppState.selectedMode === "openai") {
+          AppState.currentImageUrl = "";
+          Elements.imageUrlInput.value = "";
+          showToast("Đã xóa URL ảnh", "success");
+        } else if (
+          ["ollama-chat", "ollama-generate"].includes(AppState.selectedMode)
+        ) {
+          clearUploadedImage();
+        } else {
+          showToast("Đã xóa input", "success");
+        }
+        saveToLocalStorage();
+      }
+
+      // Analysis functions
+      async function analyzeImage() {
+        if (AppState.isAnalyzing) {
+          showToast("Đang xử lý yêu cầu trước đó...", "warning");
+          return;
+        }
+
+        // Validate based on mode
+        if (AppState.selectedMode === "openai") {
+          const url = Elements.imageUrlInput.value.trim();
+          if (!url) {
+            showToast("Vui lòng nhập URL ảnh cho chế độ OpenAI!", "error");
+            Elements.imageUrlInput.focus();
+            return;
+          }
+          AppState.currentImageUrl = url;
+        } else if (
+          ["ollama-chat", "ollama-generate"].includes(AppState.selectedMode)
+        ) {
+          if (!AppState.currentImageBase64) {
+            showToast("Vui lòng tải ảnh lên trước!", "error");
+            return;
+          }
+        }
+
+        const prompt = Elements.promptInput.value.trim();
+        if (!prompt) {
+          showToast("Vui lòng nhập câu hỏi!", "error");
+          Elements.promptInput.focus();
+          return;
+        }
+
+        AppState.isAnalyzing = true;
+        showLoading(true, "Đang phân tích ảnh...");
+
+        // Add thinking indicator to results
+        addThinkingIndicator();
+
+        const startTime = Date.now();
+
+        try {
+          let result;
+
+          switch (AppState.selectedMode) {
+            case "openai":
+              result = await callOpenAIAPI(prompt);
+              break;
+            case "ollama-chat":
+              result = await callOllamaChatAPI(prompt);
+              break;
+            case "ollama-generate":
+              result = await callGenerateAPI(prompt);
+              break;
+            default:
+              throw new Error("Chế độ API không hợp lệ");
+          }
+
+          const responseTime = (Date.now() - startTime) / 1000;
+
+          // Update stats
+          AppState.stats.totalRequests++;
+          AppState.stats.successfulRequests++;
+          AppState.stats.totalResponseTime += responseTime;
+
+          // Add to history
+          const historyItem = {
+            id: Date.now(),
+            timestamp: new Date().toLocaleString("vi-VN"),
+            mode: AppState.selectedMode,
+            prompt: prompt,
+            response: result,
+            responseTime: responseTime,
+            image: AppState.currentImageBase64 || AppState.currentImageUrl,
+            isUrl: AppState.selectedMode === "openai",
+          };
+
+          AppState.history.unshift(historyItem);
+
+          // Remove thinking indicator
+          removeThinkingIndicator();
+
+          // Update UI
+          updateResultsDisplay();
+          updateStatsDisplay();
+          saveToLocalStorage();
+
+          showToast(
+            `Phân tích thành công! (${responseTime.toFixed(2)}s)`,
+            "success"
+          );
+        } catch (error) {
+          console.error("Analysis error:", error);
+          AppState.stats.totalRequests++;
+
+          // Remove thinking indicator on error
+          removeThinkingIndicator();
+
+          showToast(`Lỗi: ${error.message}`, "error");
+        } finally {
+          showLoading(false);
+          AppState.isAnalyzing = false;
+        }
+      }
+
+      // API calling functions
+      async function callOpenAIAPI(prompt) {
+        const imageUrl = AppState.currentImageUrl;
+
+        const response = await axios.post(
+          `${AppState.apiEndpoint}/v1/chat/completions`,
+          {
+            model: "moondream",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: prompt,
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: imageUrl, // ✅ TRUYỀN THẲNG URL
+                    },
+                  },
+                ],
+              },
+            ],
+            temperature: 0.7,
+            stream: false,
+          },
+          {
+            timeout: 60000,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        return {
+          type: "openai",
+          content: response.data.choices[0].message.content,
+          usage: response.data.usage,
+          raw: response.data,
+        };
+      }
+
+      async function callOllamaChatAPI(prompt) {
+        const base64Data = AppState.currentImageBase64.split(",")[1];
+
+        const response = await axios.post(
+          `${AppState.apiEndpoint}/api/chat`,
+          {
+            model: "moondream",
+            messages: [
+              {
+                role: "user",
+                content: prompt,
+                images: [base64Data],
+              },
+            ],
+            stream: false,
+          },
+          {
+            timeout: 60000,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        return {
+          type: "ollama-chat",
+          content: response.data.message.content,
+          raw: response.data,
+        };
+      }
+
+      async function callGenerateAPI(prompt) {
+        const base64Data = AppState.currentImageBase64.split(",")[1];
+
+        const response = await axios.post(
+          `${AppState.apiEndpoint}/api/generate`,
+          {
+            model: "moondream",
+            prompt: prompt,
+            images: [base64Data],
+            stream: false,
+          },
+          {
+            timeout: 60000,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+
+        return {
+          type: "generate",
+          content: response.data.response,
+          raw: response.data,
+        };
+      }
+
+      // Thinking indicator functions
+      function addThinkingIndicator() {
+        const thinkingHTML = `
+          <div class="result-card">
+            <div class="result-header">
+              <div class="result-meta">
+                <span class="result-model">
+                  <i class="fas fa-robot"></i>
+                  ${getModeName(AppState.selectedMode)}
+                </span>
+                <span class="result-time">Đang xử lý...</span>
+              </div>
+            </div>
+            <div class="result-answer">
+              <div class="thinking-indicator active">
+                <i class="fas fa-brain"></i>
+                AI đang suy nghĩ...
+                <div class="thinking-dots">
+                  <div class="thinking-dot"></div>
+                  <div class="thinking-dot"></div>
+                  <div class="thinking-dot"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (Elements.resultsContent.querySelector(".empty-results")) {
+          Elements.resultsContent.innerHTML = thinkingHTML;
+        } else {
+          Elements.resultsContent.insertAdjacentHTML(
+            "afterbegin",
+            thinkingHTML
+          );
+        }
+      }
+
+      function removeThinkingIndicator() {
+        const thinkingElement = Elements.resultsContent.querySelector(
+          ".thinking-indicator.active"
+        );
+        if (thinkingElement) {
+          thinkingElement.closest(".result-card").remove();
+        }
+      }
+
+      function getModeName(mode) {
+        const modeNames = {
+          openai: "OpenAI",
+          "ollama-chat": "Ollama Chat",
+          "ollama-generate": "Generate",
+        };
+        return modeNames[mode] || mode;
+      }
+
+      // UI Update functions
+      function updateResultsDisplay() {
+        if (AppState.history.length === 0) {
+          Elements.resultsContent.innerHTML = `
+            <div class="empty-results">
+              <i class="fas fa-comments empty-icon"></i>
+              <div class="empty-title">Chưa có kết quả</div>
+              <p>Tải ảnh lên và đặt câu hỏi để bắt đầu</p>
+            </div>
+          `;
+          Elements.statsPanel.style.display = "none";
+          return;
+        }
+
+        let resultsHTML = "";
+
+        AppState.history.forEach((item) => {
+          const modeIcons = {
+            openai: "fas fa-code",
+            "ollama-chat": "fas fa-comment",
+            "ollama-generate": "fas fa-bolt",
+          };
+
+          const modeNames = {
+            openai: "OpenAI",
+            "ollama-chat": "Ollama Chat",
+            "ollama-generate": "Generate",
+          };
+
+          resultsHTML += `
+            <div class="result-card">
+              <div class="result-header">
+                <div class="result-meta">
+                  <span class="result-model">
+                    <i class="${modeIcons[item.mode]}"></i>
+                    ${modeNames[item.mode]}
+                  </span>
+                  <span class="result-time">${item.timestamp}</span>
+                </div>
+                <span class="result-stats">${item.responseTime.toFixed(
+                  2
+                )}s</span>
+              </div>
+              ${
+                item.prompt
+                  ? `
+                <div class="result-prompt">
+                  <i class="fas fa-question" style="color: var(--primary); margin-right: 8px;"></i>
+                  ${item.prompt}
+                </div>
+              `
+                  : ""
+              }
+              <div class="result-answer">
+                <i class="fas fa-robot" style="color: var(--secondary); margin-right: 8px;"></i>
+                ${item.response.content}
+              </div>
+              ${
+                item.image && !item.isUrl
+                  ? `
+                <div class="result-image-container">
+                  <img src="${item.image}" class="result-image" alt="Analyzed Image">
+                </div>
+              `
+                  : ""
+              }
+              ${
+                item.image && item.isUrl
+                  ? `
+                <div class="result-image-container">
+                  <div style="color: var(--gray); font-size: 0.9rem;">
+                    <i class="fas fa-link"></i> URL: ${item.image.substring(
+                      0,
+                      50
+                    )}${item.image.length > 50 ? "..." : ""}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          `;
+        });
+
+        Elements.resultsContent.innerHTML = resultsHTML;
+        Elements.statsPanel.style.display = "grid";
+      }
+
+      function updateStatsDisplay() {
+        document.getElementById("totalRequests").textContent =
+          AppState.stats.totalRequests;
+        document.getElementById("avgTime").textContent = (
+          AppState.stats.totalResponseTime / AppState.stats.totalRequests || 0
+        ).toFixed(2);
+        document.getElementById("successRate").textContent =
+          AppState.stats.totalRequests > 0
+            ? `${Math.round(
+                (AppState.stats.successfulRequests /
+                  AppState.stats.totalRequests) *
+                  100
+              )}%`
+            : "100%";
+      }
+
+      // Utility functions
+      async function testApiEndpoint() {
+        showLoading(true, "Đang kiểm tra API...");
+
+        try {
+          const response = await axios.get(`${AppState.apiEndpoint}/health`, {
+            timeout: 5000,
+          });
+
+          if (response.data.status === "healthy") {
+            showToast(
+              `✅ API hoạt động tốt! Model: ${
+                response.data.model || "Moondream"
+              }`,
+              "success"
+            );
+          } else {
+            showToast(`⚠️ API trả về: ${response.data.status}`, "warning");
+          }
+        } catch (error) {
+          showToast("❌ Không thể kết nối đến API", "error");
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      function clearHistory() {
+        if (AppState.history.length === 0) {
+          showToast("Không có lịch sử để xóa", "warning");
+          return;
+        }
+
+        if (confirm("Bạn có chắc muốn xóa toàn bộ lịch sử?")) {
+          AppState.history = [];
+          updateResultsDisplay();
+          saveToLocalStorage();
+          showToast("Đã xóa lịch sử", "success");
+        }
+      }
+
+      function exportHistory() {
+        if (AppState.history.length === 0) {
+          showToast("Không có dữ liệu để xuất", "warning");
+          return;
+        }
+
+        const data = {
+          exportDate: new Date().toISOString(),
+          totalItems: AppState.history.length,
+          stats: AppState.stats,
+          history: AppState.history,
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `moondream-export-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast("Đã xuất dữ liệu thành công!", "success");
+      }
+
+      async function checkApiHealth() {
+        try {
+          await axios.get(`${AppState.apiEndpoint}/health`, {
+            timeout: 3000,
+          });
+        } catch (error) {
+          // Silent fail for background check
+        }
+      }
+
+      function showLoading(show, text = "Đang xử lý...") {
+        if (show) {
+          Elements.loadingText.textContent = text;
+          Elements.loading.classList.add("active");
+          Elements.analyzeBtn.disabled = true;
+          Elements.testBtn.disabled = true;
+          Elements.clearBtn.disabled = true;
+        } else {
+          Elements.loading.classList.remove("active");
+          Elements.analyzeBtn.disabled = false;
+          Elements.testBtn.disabled = false;
+          Elements.clearBtn.disabled = false;
+        }
+      }
+
+      // Toast system
+      function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `toast toast-${type}`;
+
+        const icons = {
+          success: "fas fa-check-circle",
+          error: "fas fa-exclamation-circle",
+          warning: "fas fa-exclamation-triangle",
+          info: "fas fa-info-circle",
+        };
+
+        toast.innerHTML = `
+          <i class="toast-icon ${icons[type] || icons.info}"></i>
+          <div class="toast-message">${message}</div>
+        `;
+
+        Elements.toastContainer.appendChild(toast);
+
+        setTimeout(() => toast.classList.add("show"), 10);
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 300);
+        }, 4000);
+      }
+
+      // Drag and drop helpers
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      // Local Storage
+      function loadSavedData() {
+        try {
+          const savedHistory = localStorage.getItem("moondreamHistory");
+          const savedStats = localStorage.getItem("moondreamStats");
+          const savedEndpoint = localStorage.getItem("moondreamEndpoint");
+          const savedMode = localStorage.getItem("moondreamMode");
+          const savedImageUrl = localStorage.getItem("moondreamImageUrl");
+          const savedImageBase64 = localStorage.getItem("moondreamImageBase64");
+
+          if (savedHistory) AppState.history = JSON.parse(savedHistory);
+          if (savedStats) AppState.stats = JSON.parse(savedStats);
+          if (savedEndpoint) {
+            AppState.apiEndpoint = savedEndpoint;
+            Elements.apiEndpointInput.value = savedEndpoint;
+          }
+          if (savedMode) {
+            AppState.selectedMode = savedMode;
+            Elements.apiModes.forEach((mode) => {
+              if (mode.dataset.mode === savedMode) {
+                mode.classList.add("active");
+              } else {
+                mode.classList.remove("active");
+              }
+            });
+          }
+          if (savedImageUrl) {
+            AppState.currentImageUrl = savedImageUrl;
+          }
+          if (savedImageBase64) {
+            AppState.currentImageBase64 = savedImageBase64;
+            Elements.imagePreview.src = savedImageBase64;
+            Elements.uploadArea.classList.add("has-image");
+            Elements.imageControls.style.display = "flex";
+          }
+
+          updateResultsDisplay();
+          updateStatsDisplay();
+        } catch (error) {
+          console.error("Error loading saved data:", error);
+        }
+      }
+
+      function saveToLocalStorage() {
+        try {
+          localStorage.setItem(
+            "moondreamHistory",
+            JSON.stringify(AppState.history)
+          );
+          localStorage.setItem(
+            "moondreamStats",
+            JSON.stringify(AppState.stats)
+          );
+          localStorage.setItem("moondreamEndpoint", AppState.apiEndpoint);
+          localStorage.setItem("moondreamMode", AppState.selectedMode);
+          localStorage.setItem("moondreamImageUrl", AppState.currentImageUrl);
+          if (AppState.currentImageBase64) {
+            localStorage.setItem(
+              "moondreamImageBase64",
+              AppState.currentImageBase64
+            );
+          } else {
+            localStorage.removeItem("moondreamImageBase64");
+          }
+        } catch (error) {
+          console.error("Error saving data:", error);
+        }
+      }
+    </script>
+  </body>
+</html>
